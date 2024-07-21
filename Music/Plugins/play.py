@@ -226,7 +226,7 @@ I need to become an admin with some permissions:
 - **can restrict members:** To protect Music from spam
 """
         )
-        return
+        # return
     if not a.can_manage_voice_chats:
         await message.reply_text(
             "I do not have the necessary permissions to perform this action."
