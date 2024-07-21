@@ -563,7 +563,9 @@ async def startyuplay(_, CallbackQuery):
     chat_id = CallbackQuery.message.chat.id
     userid = CallbackQuery.from_user.id
     callback_request = callback_data.split(None, 1)[1]
-
+    url = None
+    title = None
+    
     try:
         id, duration, user_id = callback_request.split("|")
         if duration == "None":
@@ -584,11 +586,20 @@ async def startyuplay(_, CallbackQuery):
             )
             return
 
-        # Start the download and conversion process
+        # Extract video info
+        with yt_dlp.YoutubeDL(ytdl_opts) as ytdl:
+            info = ytdl.extract_info(url, download=False)
+        
+        title = info.get("title", "Unknown Title")
+        thumbnail = info.get("thumbnail", "")
+        
+        # Notify the user about the download
         mystic = await CallbackQuery.message.reply_text(f"Downloading {title[:50]}")
+        
+        # Start the download and conversion process
         loop = asyncio.get_event_loop()
         x = await loop.run_in_executor(None, download, url, my_hook)
-        
+
         if not x:
             raise ValueError("Download failed or returned invalid file path")
 
@@ -598,9 +609,7 @@ async def startyuplay(_, CallbackQuery):
             raise ValueError("Conversion failed or returned invalid file path")
 
         # Handle file and bot interaction
-        title = await get_title_from_info(url)  # You may need to define this function
-        thumbnail = await get_thumbnail_from_info(url)  # You may need to define this function
-        thumb = await generate_thumbnail(thumbnail, title)  # You may need to define this function
+        thumb = await generate_thumbnail(thumbnail, title)  # Ensure this function exists
 
         if await is_active_chat(chat_id):
             position = await put(chat_id, file=file)
@@ -644,6 +653,7 @@ async def startyuplay(_, CallbackQuery):
 
     except Exception as e:
         await CallbackQuery.message.edit(f"Error occurred\n**Possible reason:** {e}")
+
 
 
     def my_hook(d):
