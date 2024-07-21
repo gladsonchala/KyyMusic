@@ -6,25 +6,25 @@ from os import path
 class FFmpegReturnCodeError(Exception):
     pass
 
-async def convert(file_path: str = None) -> str:
-    if file_path is None:
+async def convert(file_path: str) -> str:
+    if not file_path:
         raise ValueError("file_path must be provided")
 
-    # Ensure the 'raw_files' directory exists
-    raw_files_dir = 'raw_files'
-    os.makedirs(raw_files_dir, exist_ok=True)
+    # Ensure output directory exists
+    output_dir = 'raw_files'
+    if not path.exists(output_dir):
+        os.makedirs(output_dir)
 
     out = path.basename(file_path)
     out = out.split(".")
     out[-1] = "raw"
     out = ".".join(out)
-    out = path.join(raw_files_dir, out)
+    out = path.join(output_dir, out)
 
     if path.isfile(out):
         return out
 
     try:
-        # Start FFmpeg process
         proc = await asyncio.create_subprocess_shell(
             cmd=(
                 f"ffmpeg -y -i {file_path} "
@@ -32,17 +32,22 @@ async def convert(file_path: str = None) -> str:
                 f"{out}"
             ),
             stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
         )
 
-        stdout, stderr = await proc.communicate()
+        stderr_output = await proc.stderr.read()
+        await proc.communicate()
 
         if proc.returncode != 0:
-            # Decode and log error messages
-            stderr_output = stderr.decode(errors='ignore')
-            print(f"FFmpeg stderr output: {stderr_output}")
             raise FFmpegReturnCodeError("FFmpeg did not return 0")
+
+        return out
+    except Exception as e:
+        print(f"Error during conversion: {e}")
+        if stderr_output:
+            print(f"FFmpeg stderr output: {stderr_output.decode()}")
+        raise FFmpegReturnCodeError("FFmpeg did not return 0")
+
 
         return out
     except Exception as e:
