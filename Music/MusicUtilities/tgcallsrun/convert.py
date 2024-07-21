@@ -5,18 +5,19 @@ from os import path
 class FFmpegReturnCodeError(Exception):
     pass
 
-async def convert(file_path: str) -> str:
-    # Check if file_path is None or empty and set a default or raise an error
-    # if not file_path or not isinstance(file_path, str):
-      #  raise ValueError("Invalid file_path provided. It must be a non-empty string.")
-    
+async def convert(file_path: str = None) -> str:
+    # Set a default file path if none is provided
+    if file_path is None:
+        file_path = "default_input_file.mp3"  # Replace with your default file path
+
+    # Ensure the file_path is valid
+    if not isinstance(file_path, str) or not file_path.strip():
+        raise ValueError("Invalid file_path provided. It must be a non-empty string.")
+
     # Ensure the raw_files directory exists
     raw_files_dir = "raw_files"
     if not os.path.exists(raw_files_dir):
         os.makedirs(raw_files_dir)
-
-    # Debugging print
-    print(f"Debug: Converting file_path = {file_path}")
 
     # Construct output file path
     out = path.basename(file_path)
@@ -27,7 +28,7 @@ async def convert(file_path: str) -> str:
 
     # Check if the output file already exists
     if path.isfile(out):
-        print(f"Debug: File already exists at {out}")
+        print(f"File already exists at {out}")
         return out
 
     try:
@@ -44,10 +45,10 @@ async def convert(file_path: str) -> str:
         stderr_output, _ = await proc.communicate()
         if proc.returncode != 0:
             # Print the stderr output for debugging
-            print(f"Debug: FFmpeg stderr output: {stderr_output.decode()}")
+            print(f"FFmpeg stderr output: {stderr_output.decode()}")
             raise FFmpegReturnCodeError("FFmpeg did not return 0")
 
-        print(f"Debug: Conversion successful. Output file at {out}")
+        print(f"Conversion successful. Output file at {out}")
         return out
     except Exception as e:
         # Print the exception message for debugging
