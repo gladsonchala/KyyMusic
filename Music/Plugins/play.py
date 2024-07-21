@@ -214,7 +214,8 @@ You are an Anonymous Admin! Return to the User Account from Admin Rights!
             f"The bot is currently under maintenance. We apologize for the inconvenience!"
         )
     a = await app.get_chat_member(message.chat.id, BOT_ID)
-    if a.status != "administrator":
+    # if a.status != "administrator":
+    if a.status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.CREATOR]:
         await message.reply_text(
             """
 I need to become an admin with some permissions:
