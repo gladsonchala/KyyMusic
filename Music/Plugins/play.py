@@ -138,7 +138,9 @@ useer = "NaN"
 que = {}
 
 
-
+@app.on_message(
+    command("music") & ~filters.bot & ~filters.private
+)
 @app.on_edited_message(
     command("music") & ~filters.bot & ~filters.private
 )
@@ -153,33 +155,33 @@ async def music_onoff(_, message: Message):
     except:
         return
     if len(message.command) != 2:
-        await message.reply_text("**• usage:**\n\n `/music on` & `/music off`")
+        await message.reply_text("**• Usage:**\n\n `/music on` & `/music off`")
         return
     status = message.text.split(None, 1)[1]
     message.chat.id
     if status in ("ON", "on", "On"):
         lel = await message.reply("`processing...`")
         if not message.chat.id in DISABLED_GROUPS:
-            await lel.edit("» **Music Aktif.**")
+            await lel.edit("» **Music Active.**")
             return
         DISABLED_GROUPS.remove(message.chat.id)
         await lel.edit(
-            f"**✅ Music Telah Di Diaktifkan Di {message.chat.title}**"
+            f"**✅ Music Has Been Activated {message.chat.title}**"
         )
 
     elif status in ("OFF", "off", "Off"):
         lel = await message.reply("`processing...`")
 
         if message.chat.id in DISABLED_GROUPS:
-            await lel.edit("» **Music Di Nonaktifkan.**")
+            await lel.edit("» **Music Disabled.**")
             return
         DISABLED_GROUPS.append(message.chat.id)
         await lel.edit(
-            f"**✅ Music Telah Di Nonaktifkan Di {message.chat.title}**"
+            f"**✅ Music Has Been Disabled {message.chat.title}**"
         )
     else:
         await message.reply_text(
-            "**• Penggunaan:**\n\n `/music on` & `/music off`"
+            "**• Usage:**\n\n `/music on` & `/music off`"
         )
 
 
@@ -189,14 +191,13 @@ async def play(_, message: Message):
     if message.sender_chat:
         return await message.reply_text(
             """
-Anda adalah Admin Anonim!
-Kembalikan kembali ke Akun Pengguna Dari Hak Admin.
+You are an Anonymous Admin! Return to the User Account from Admin Rights!
 """
         )
     global useer
     if chat_id in DISABLED_GROUPS:
         return await message.reply_text(
-            f"😕 **Maap {message.from_user.mention}, Musicnya Dimatiin Sama Admin**" 
+            f"😕 **Sorry {message.from_user.mention}, The music has been turned off by the admin.**" 
         )
         return
     user_id = message.from_user.id
@@ -207,28 +208,28 @@ Kembalikan kembali ke Akun Pengguna Dari Hak Admin.
         LOG_ID = "-100156899495"
         if int(chat_id) != int(LOG_ID):
             return await message.reply_text(
-                f"Bot sedang dalam proses peng Updatean. Maaf untuk ketidaknyamanannya!"
+                f"The bot is currently being updated. We apologize for the inconvenience!"
             )
         return await message.reply_text(
-            f"Bot sedang dalam Pemeliharaan. Maaf untuk ketidaknyamanannya!"
+            f"The bot is currently under maintenance. We apologize for the inconvenience!"
         )
     a = await app.get_chat_member(message.chat.id, BOT_ID)
     if a.status != "administrator":
         await message.reply_text(
             """
-Saya perlu menjadi admin dengan beberapa izin:
+I need to become an admin with some permissions:
 
-- **dapat mengelola obrolan suara:** Untuk mengelola obrolan suara
-- **dapat menghapus pesan:** Untuk menghapus Sampah yang Dicari Musik
-- **dapat mengundang pengguna**: Untuk mengundang asisten untuk mengobrol
-- **dapat membatasi anggota**: Untuk Melindungi Musik dari Spam.
+- **can manage voice chat:** To manage voice chat
+- **can delete messages:** To delete Music Search Spam
+- **can invite users:** To invite assistants to chat
+- **can restrict members:** To protect Music from spam
 """
         )
         return
     if not a.can_manage_voice_chats:
         await message.reply_text(
-            "Saya tidak memiliki izin yang diperlukan untuk melakukan tindakan ini."
-            + "\n❌ MENGELOLA OBROLAN SUARA"
+            "I do not have the necessary permissions to perform this action."
+            + "\n❌ MANAGING VOICE CHAT"
         )
         return
     if not a.can_delete_messages:
