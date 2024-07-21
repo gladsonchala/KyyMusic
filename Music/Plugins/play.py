@@ -12,7 +12,7 @@ import shutil
 import psutil
 from typing import Callable
 from pyrogram import Client, enums
-from pyrogram.types import Message, Voice
+from pyrogram.types import Message, Voice, ChatPermissions
 from pytgcalls import StreamType
 from pytgcalls.types.input_stream import InputAudioStream, InputStream
 from sys import version as pyver
@@ -215,7 +215,7 @@ You are an Anonymous Admin! Return to the User Account from Admin Rights!
         )
     a = await app.get_chat_member(message.chat.id, BOT_ID)
     # if a.status != "administrator":
-    if a.status not in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER, enums.ChatMemberStatus.MEMBER]:
+    if a.status not in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER]:
         await message.reply_text(
             """
 I need to become an admin with some permissions:
