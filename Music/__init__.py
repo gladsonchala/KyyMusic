@@ -120,7 +120,7 @@ loop = asyncio.get_event_loop()
 
 
 
-BOT_ID = 0
+BOT_ID = 7364417403
 BOT_NAME = ""
 BOT_USERNAME = ""
 ASSID = 0
@@ -144,7 +144,8 @@ def all_info(app, client):
     global ASSID, ASSNAME, ASSMENTION, ASSUSERNAME
     getme = app.get_me()
     getme1 = client.get_me()
-    BOT_ID = getme.id
+    # BOT_ID = getme.id
+    BOT_ID = 7364417403
     ASSID = getme1.id
     if getme.last_name:
         BOT_NAME = getme.first_name + " " + getme.last_name
