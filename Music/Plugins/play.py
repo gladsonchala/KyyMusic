@@ -11,7 +11,7 @@ import yt_dlp
 import shutil
 import psutil
 from typing import Callable
-from pyrogram import Client
+from pyrogram import Client, enums
 from pyrogram.types import Message, Voice
 from pytgcalls import StreamType
 from pytgcalls.types.input_stream import InputAudioStream, InputStream
