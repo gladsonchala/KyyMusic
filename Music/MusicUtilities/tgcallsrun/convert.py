@@ -1,23 +1,29 @@
 import asyncio
+import os
 from os import path
 
 class FFmpegReturnCodeError(Exception):
     pass
 
 async def convert(file_path: str) -> str:
-    # Check if file_path is None or empty
+    # Check if file_path is None or empty and set a default or raise an error
     if not file_path or not isinstance(file_path, str):
         raise ValueError("Invalid file_path provided. It must be a non-empty string.")
+    
+    # Ensure the raw_files directory exists
+    raw_files_dir = "raw_files"
+    if not os.path.exists(raw_files_dir):
+        os.makedirs(raw_files_dir)
 
     # Debugging print
     print(f"Debug: Converting file_path = {file_path}")
 
+    # Construct output file path
     out = path.basename(file_path)
     out = out.split(".")
     out[-1] = "raw"
     out = ".".join(out)
-    out = path.basename(out)
-    out = path.join("raw_files", out)
+    out = path.join(raw_files_dir, out)
 
     # Check if the output file already exists
     if path.isfile(out):
