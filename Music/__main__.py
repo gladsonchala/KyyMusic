@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 scheduler = AsyncIOScheduler()
 
-# Function to handle retry logic for database operations
+# Retry logic for database operations
 async def retry_db_operation(operation, retries=5, delay=1):
     for attempt in range(retries):
         try:
@@ -37,7 +37,6 @@ async def retry_db_operation(operation, retries=5, delay=1):
                 raise
     raise Exception('Max retries exceeded for database operation')
 
-# Update functions to use retry logic
 async def clean_restart_stage_retry():
     return await retry_db_operation(clean_restart_stage)
 
@@ -85,11 +84,22 @@ async def load_start():
         )
         scheduler.start()
 
+async def main():
+    async with Client(
+        ':Music:',
+        API_ID,
+        API_HASH,
+        bot_token=BOT_TOKEN,
+        plugins={'root': 'Music.Plugins'}
+    ) as client:
+        await load_start()
+        run()
+        await idle()
+
+# Run the main function
 loop = asyncio.get_event_loop()
-loop.run_until_complete(load_start())
-
-run()
-idle()
-loop.close()
-
-print("[LOG] CLOSING BOT")
+try:
+    loop.run_until_complete(main())
+finally:
+    loop.close()
+    print("[LOG] CLOSING BOT")
