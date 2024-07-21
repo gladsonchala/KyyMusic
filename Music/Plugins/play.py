@@ -215,7 +215,7 @@ You are an Anonymous Admin! Return to the User Account from Admin Rights!
         )
     a = await app.get_chat_member(message.chat.id, BOT_ID)
     # if a.status != "administrator":
-    if a.status in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER, enums.ChatMemberStatus.MEMBER]:
+    if a.status not in [enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER, enums.ChatMemberStatus.MEMBER]:
         await message.reply_text(
             """
 I need to become an admin with some permissions:
@@ -226,26 +226,26 @@ I need to become an admin with some permissions:
 - **can restrict members:** To protect Music from spam
 """
         )
-        # return
-    if not a.can_manage_voice_chats:
+        return
+    if not a.ChatPermissions.can_manage_voice_chats:
         await message.reply_text(
             "I do not have the necessary permissions to perform this action."
             + "\n❌ MANAGING VOICE CHAT"
         )
         return
-    if not a.can_delete_messages:
+    if not a.ChatPermissions.can_delete_messages:
         await message.reply_text(
             "Saya tidak memiliki izin yang diperlukan untuk melakukan tindakan ini."
             + "\n❌ HAPUS PESAN"
         )
         return
-    if not a.can_invite_users:
+    if not a.ChatPermissions.can_invite_users:
         await message.reply_text(
             "I don't have the required permission to perform this action."
             + "\n❌ UNDANG PENGGUNA MELALUI LINK"
         )
         return
-    if not a.can_restrict_members:
+    if not a.ChatPermissions.can_restrict_members:
         await message.reply_text(
             "Saya tidak memiliki izin yang diperlukan untuk melakukan tindakan ini."
             + "\n❌ BAN PENGGUNA"
