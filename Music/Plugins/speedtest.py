@@ -7,7 +7,7 @@ from pyrogram import filters, Client
 from Music.MusicUtilities.database.onoff import (is_on_off, add_on, add_off)
 from pyrogram.types import Message
 
-@app.on_message(filters.command("speedtest") & ~filters.edited)
+@app.on_edited_message(filters.command("speedtest"))
 async def gstats(_, message):
     userid = message.from_user.id
     if await is_on_off(2):
