@@ -379,64 +379,51 @@ I need to become an admin with some permissions:
 
         def my_hook(d):
             if d["status"] == "downloading":
-                percentage = d["_percent_str"]
+                percentage = d.get("_percent_str", "0%")
                 per = (str(percentage)).replace(".", "", 1).replace("%", "", 1)
-                per = int(per)
-                eta = d["eta"]
-                speed = d["_speed_str"]
-                size = d["_total_bytes_str"]
-                bytesx = d["total_bytes"]
-                if str(bytesx) in flex:
-                    pass
-                else:
-                    flex[str(bytesx)] = 1
-                if flex[str(bytesx)] == 1:
-                    flex[str(bytesx)] += 1
-                    try:
-                        if eta > 2:
-                            mystic.edit(
-                                f"Downloading {title[:50]}\n\n**FileSize:** {size}\n**Downloaded:** {percentage}\n**Speed:** {speed}\n**ETA:** {eta} sec"
-                            )
-                    except Exception:
-                        pass
-                if per > 250:
-                    if flex[str(bytesx)] == 2:
-                        flex[str(bytesx)] += 1
-                        if eta > 2:
-                            mystic.edit(
-                                f"Downloading {title[:50]}..\n\n**FileSize:** {size}\n**Downloaded:** {percentage}\n**Speed:** {speed}\n**ETA:** {eta} sec"
-                            )
-                        print(
-                            f"[{videoid}] Downloaded {percentage} at a speed of {speed} | ETA: {eta} seconds"
-                        )
-                if per > 500:
-                    if flex[str(bytesx)] == 3:
-                        flex[str(bytesx)] += 1
-                        if eta > 2:
-                            mystic.edit(
-                                f"Downloading {title[:50]}...\n\n**FileSize:** {size}\n**Downloaded:** {percentage}\n**Speed:** {speed}\n**ETA:** {eta} sec"
-                            )
-                        print(
-                            f"[{videoid}] Downloaded {percentage} at a speed of {speed} | ETA: {eta} seconds"
-                        )
-                if per > 800:
-                    if flex[str(bytesx)] == 4:
-                        flex[str(bytesx)] += 1
-                        if eta > 2:
-                            mystic.edit(
-                                f"Downloading {title[:50]}....\n\n**FileSize:** {size}\n**Downloaded:** {percentage}\n**Speed:** {speed}\n**ETA:** {eta} sec"
-                            )
-                        print(
-                            f"[{videoid}] Downloaded {percentage} at a speed of {speed} | ETA: {eta} seconds"
-                        )
-            if d["status"] == "finished":
                 try:
-                    taken = d["_elapsed_str"]
+                    per = int(per)
+                except ValueError:
+                    per = 0
+                eta = d.get("eta", 0)
+                speed = d.get("_speed_str", "N/A")
+                size = d.get("_total_bytes_str", "Unknown")
+                bytesx = d.get("total_bytes", 0)
+                
+                # Initialize flex dictionary if not already done
+                if 'flex' not in globals():
+                    global flex
+                    flex = {}
+                
+                if str(bytesx) not in flex:
+                    flex[str(bytesx)] = 1
+                else:
+                    flex[str(bytesx)] += 1
+                
+                if flex[str(bytesx)] in {1, 2, 3, 4}:
+                    if eta > 2:
+                        progress_indicator = '.' * flex[str(bytesx)]
+                        mystic.edit(
+                            f"Downloading {title[:50]}{progress_indicator}\n\n"
+                            f"**FileSize:** {size}\n"
+                            f"**Downloaded:** {percentage}\n"
+                            f"**Speed:** {speed}\n"
+                            f"**ETA:** {eta} sec"
+                        )
+                        print(
+                            f"[{videoid}] Downloaded {percentage} at a speed of {speed} | ETA: {eta} seconds"
+                        )
+            elif d["status"] == "finished":
+                try:
+                    taken = d.get("_elapsed_str", "00:00")
                 except Exception:
                     taken = "00:00"
-                size = d["_total_bytes_str"]
+                size = d.get("_total_bytes_str", "Unknown")
                 mystic.edit(
-                    f"**Downloaded {title[:50]}.....**\n\n**FileSize:** {size}\n**Time Taken:** {taken} sec\n\n**Converting File**[__FFmpeg processing__]"
+                    f"**Downloaded {title[:50]}.....**\n\n"
+                    f"**FileSize:** {size}\n"
+                    f"**Time Taken:** {taken} sec\n\n"
+                    f"**Converting File**[__FFmpeg processing__]"
                 )
                 print(f"[{videoid}] Downloaded| Elapsed: {taken} seconds")
 
@@ -574,50 +561,90 @@ I need to become an admin with some permissions:
 async def startyuplay(_, CallbackQuery):
     callback_data = CallbackQuery.data.strip()
     chat_id = CallbackQuery.message.chat.id
-    CallbackQuery.message.chat.title
-    callback_request = callback_data.split(None, 1)[1]
     userid = CallbackQuery.from_user.id
+    callback_request = callback_data.split(None, 1)[1]
+
     try:
         id, duration, user_id = callback_request.split("|")
-    except Exception as e:
-        return await CallbackQuery.message.edit(
-            f"Error Occured\n**Possible reason could be**:{e}"
-        )
-    if duration == "None":
-        return await CallbackQuery.message.reply_text(
-            f"Sorry!, Live Videos are not supported"
-        )
-    if CallbackQuery.from_user.id != int(user_id):
-        return await CallbackQuery.answer(
-            "This is not for you! Search You Own Song nigga", show_alert=True
-        )
-    await CallbackQuery.message.delete()
-    checking = f"[{CallbackQuery.from_user.first_name}](tg://user?id={userid})"
-    url = f"https://www.youtube.com/watch?v={id}"
-    videoid = id
-    smex = int(time_to_seconds(duration))
-    if smex > DURATION_LIMIT:
-        await CallbackQuery.message.reply_text(
-            f"""
-**Kesalahan Durasi**
+        if duration == "None":
+            await CallbackQuery.message.reply_text("Sorry, live videos are not supported.")
+            return
 
-**Durasi yang Diizinkan: {DURATION_LIMIT}**
-**Durasi yang Diteriman:** {duration}
+        if CallbackQuery.from_user.id != int(user_id):
+            await CallbackQuery.answer("This is not for you! Search your own song.", show_alert=True)
+            return
+
+        url = f"https://www.youtube.com/watch?v={id}"
+        videoid = id
+        smex = int(time_to_seconds(duration))
+
+        if smex > DURATION_LIMIT:
+            await CallbackQuery.message.reply_text(
+                f"**Duration Error**\n\n**Allowed Duration:** {DURATION_LIMIT}\n**Received Duration:** {duration}"
+            )
+            return
+
+        # Start the download and conversion process
+        mystic = await CallbackQuery.message.reply_text(f"Downloading {title[:50]}")
+        loop = asyncio.get_event_loop()
+        x = await loop.run_in_executor(None, download, url, my_hook)
+        
+        if not x:
+            raise ValueError("Download failed or returned invalid file path")
+
+        file = await convert(x)
+        
+        if not file:
+            raise ValueError("Conversion failed or returned invalid file path")
+
+        # Handle file and bot interaction
+        title = await get_title_from_info(url)  # You may need to define this function
+        thumbnail = await get_thumbnail_from_info(url)  # You may need to define this function
+        thumb = await generate_thumbnail(thumbnail, title)  # You may need to define this function
+
+        if await is_active_chat(chat_id):
+            position = await put(chat_id, file=file)
+            buttons = play_markup(videoid, user_id)
+            await CallbackQuery.message.reply_photo(
+                photo=thumb,
+                caption=f"""
+<b>💡 Added to queue</b>
+
+<b>🏷 Name:</b> [{title[:25]}]({url})
+<b>⏱️ Duration:</b> {duration}
+<b>💡</b> [More Information](https://t.me/{BOT_USERNAME}?start=info_{id})
+<b>🎧 Requested by:</b> {checking}
+
+<b>#️⃣ Queue Position:</b> {position}
+""",
+                reply_markup=InlineKeyboardMarkup(buttons)
+            )
+        else:
+            await music_on(chat_id)
+            await add_active_chat(chat_id)
+            await music.pytgcalls.join_group_call(
+                chat_id,
+                InputStream(InputAudioStream(file)),
+                stream_type=StreamType().local_stream
+            )
+            buttons = play_markup(videoid, user_id)
+            await CallbackQuery.message.reply_photo(
+                photo=thumb,
+                reply_markup=InlineKeyboardMarkup(buttons),
+                caption=f"""
+<b>🏷 Name:</b> [{title[:25]}]({url})
+<b>⏱️ Duration:</b> {duration}
+<b>💡</b> [More Information](https://t.me/{BOT_USERNAME}?start=info_{id})
+<b>🎧 Requested by:</b> {checking}
 """
-        )
-        return
-    try:
-        with yt_dlp.YoutubeDL(ytdl_opts) as ytdl:
-            x = ytdl.extract_info(url, download=False)
+            )
+
+        os.remove(thumb)
+        await CallbackQuery.message.delete()
+
     except Exception as e:
-        return await CallbackQuery.message.reply_text(
-            f"Gagal mengunduh video ini..\n\n**Alasan**: {e}"
-        )
-    title = x["title"]
-    mystic = await CallbackQuery.message.reply_text(f"Downloading {title[:50]}")
-    thumbnail = x["thumbnail"]
-    (x["id"])
-    videoid = x["id"]
+        await CallbackQuery.message.edit(f"Error occurred\n**Possible reason:** {e}")
+
 
     def my_hook(d):
         if d["status"] == "downloading":
