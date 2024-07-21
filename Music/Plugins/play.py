@@ -227,30 +227,30 @@ I need to become an admin with some permissions:
 """
         )
         return
-    if not a.ChatPermissions.can_manage_voice_chats:
-        await message.reply_text(
-            "I do not have the necessary permissions to perform this action."
-            + "\n❌ MANAGING VOICE CHAT"
-        )
-        return
-    if not a.ChatPermissions.can_delete_messages:
-        await message.reply_text(
-            "Saya tidak memiliki izin yang diperlukan untuk melakukan tindakan ini."
-            + "\n❌ HAPUS PESAN"
-        )
-        return
-    if not a.ChatPermissions.can_invite_users:
-        await message.reply_text(
-            "I don't have the required permission to perform this action."
-            + "\n❌ UNDANG PENGGUNA MELALUI LINK"
-        )
-        return
-    if not a.ChatPermissions.can_restrict_members:
-        await message.reply_text(
-            "Saya tidak memiliki izin yang diperlukan untuk melakukan tindakan ini."
-            + "\n❌ BAN PENGGUNA"
-        )
-        return
+    # if not a.ChatPermissions.can_manage_voice_chats:
+    #     await message.reply_text(
+    #         "I do not have the necessary permissions to perform this action."
+    #         + "\n❌ MANAGING VOICE CHAT"
+    #     )
+    #     return
+    # if not a.ChatPermissions.can_delete_messages:
+    #     await message.reply_text(
+    #         "Saya tidak memiliki izin yang diperlukan untuk melakukan tindakan ini."
+    #         + "\n❌ HAPUS PESAN"
+    #     )
+    #     return
+    # if not a.ChatPermissions.can_invite_users:
+    #     await message.reply_text(
+    #         "I don't have the required permission to perform this action."
+    #         + "\n❌ UNDANG PENGGUNA MELALUI LINK"
+    #     )
+    #     return
+    # if not a.ChatPermissions.can_restrict_members:
+    #     await message.reply_text(
+    #         "Saya tidak memiliki izin yang diperlukan untuk melakukan tindakan ini."
+    #         + "\n❌ BAN PENGGUNA"
+    #     )
+    #     return
     try: 
         b = await app.get_chat_member(message.chat.id , ASSID) 
         if b.status == "banned":
