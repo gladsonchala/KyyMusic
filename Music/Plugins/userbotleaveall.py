@@ -6,6 +6,10 @@ from Music.MusicUtilities.helpers.filters import command
 from pyrogram import Client, filters
 
 
+@Client.on_message(
+    command(["userbotleaveall", f"userbotleaveall@{BOT_USERNAME}"])
+    & filters.user(SUDOERS)
+)
 @Client.on_edited_message(
     command(["userbotleaveall", f"userbotleaveall@{BOT_USERNAME}"])
     & filters.user(SUDOERS)
