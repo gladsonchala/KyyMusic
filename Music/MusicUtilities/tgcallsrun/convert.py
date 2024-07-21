@@ -43,9 +43,12 @@ async def convert(file_path: str = None) -> str:
 
         # Communicate with the process and await completion
         stderr_output, _ = await proc.communicate()
+        
+        if stderr_output:
+            stderr_output = stderr_output.decode(errors='ignore')  # Ignore decode errors
+            print(f"FFmpeg stderr output: {stderr_output}")
+
         if proc.returncode != 0:
-            # Print the stderr output for debugging
-            print(f"FFmpeg stderr output: {stderr_output.decode()}")
             raise FFmpegReturnCodeError("FFmpeg did not return 0")
 
         print(f"Conversion successful. Output file at {out}")
