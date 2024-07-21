@@ -7,8 +7,8 @@ class FFmpegReturnCodeError(Exception):
 
 async def convert(file_path: str) -> str:
     # Check if file_path is None or empty and set a default or raise an error
-    if not file_path or not isinstance(file_path, str):
-        raise ValueError("Invalid file_path provided. It must be a non-empty string.")
+    # if not file_path or not isinstance(file_path, str):
+      #  raise ValueError("Invalid file_path provided. It must be a non-empty string.")
     
     # Ensure the raw_files directory exists
     raw_files_dir = "raw_files"
